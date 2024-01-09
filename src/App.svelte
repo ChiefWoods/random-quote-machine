@@ -1,7 +1,10 @@
-<script lang="ts">
+<script lang='ts'>
+  import Footer from './lib/Footer.svelte';
 </script>
 
-<main></main>
+<main>
+  <Footer />
+</main>
 
 <style>
 </style>
