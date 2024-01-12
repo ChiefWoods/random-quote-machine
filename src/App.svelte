@@ -1,10 +1,18 @@
-<script lang='ts'>
-  import Footer from './lib/Footer.svelte';
+<script lang="ts">
+  import Card from "./lib/Card.svelte";
+  import Footer from "./lib/Footer.svelte";
 </script>
 
 <main>
-  <Footer />
+  <Card />
 </main>
+<Footer />
 
 <style>
+  main {
+    background: var(--current-color);
+    flex: 1;
+    display: grid;
+    place-items: center;
+  }
 </style>
