@@ -92,7 +92,9 @@
   @import url("https://fonts.googleapis.com/css2?family=Rubik:wght@300;400&display=swap");
 
   :global(:root) {
-    --current-color: #ff595e;
+    --current-color: black;
+    --transition-prop: all 1s;
+    --transition-duration: 1s;
   }
 
   #quote-box {
@@ -116,6 +118,7 @@
     font-size: 2.5rem;
     color: var(--current-color);
     text-align: center;
+    transition: color var(--transition-duration);
   }
 
   span {
@@ -124,6 +127,7 @@
     font-weight: 300;
     color: var(--current-color);
     margin-left: auto;
+    transition: color var(--transition-duration);
   }
 
   #btn-container {

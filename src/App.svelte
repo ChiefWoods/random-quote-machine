@@ -14,5 +14,6 @@
     flex: 1;
     display: grid;
     place-items: center;
+    transition: background var(--transition-duration);
   }
 </style>

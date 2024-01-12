@@ -18,6 +18,7 @@
     justify-content: center;
     align-items: center;
     padding: 10px;
+    transition: background var(--transition-duration);
   }
 
   a:hover,
