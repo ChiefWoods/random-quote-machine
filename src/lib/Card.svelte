@@ -19,8 +19,6 @@
 
   let text: string;
   let author: string;
-  let twitter: { id: string; icon: string; href: string; alt: string };
-  let tumblr: { id: string; icon: string; href: string; alt: string };
 
   function getNewQuote() {
     fetch("http://localhost:8080/api/quote/villain")
@@ -28,20 +26,6 @@
       .then((data) => {
         text = data.quote;
         author = data.name;
-
-        twitter = {
-          id: "tweet-quote",
-          icon: Twitter,
-          href: generateTwitterLink(text, author),
-          alt: "Twitter",
-        };
-
-        tumblr = {
-          id: "share-quote",
-          icon: Tumblr,
-          href: generateTumblrLink(text, author),
-          alt: "Tumblr",
-        };
 
         changeColor();
       })
@@ -81,8 +65,18 @@
   </blockquote>
   <div id="btn-container">
     <div>
-      <LogoBtn {...twitter} />
-      <LogoBtn {...tumblr} />
+      <LogoBtn
+        id="tweet-quote"
+        icon={Twitter}
+        href={generateTwitterLink(text, author)}
+        alt="Twitter"
+      />
+      <LogoBtn
+        id="share-quote"
+        icon={Tumblr}
+        href="{generateTumblrLink(text, author)},"
+        alt="Tumblr"
+      />
     </div>
     <button id="new-quote" on:click={getNewQuote}>New Quote</button>
   </div>
