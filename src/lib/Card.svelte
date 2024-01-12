@@ -146,5 +146,14 @@
     cursor: pointer;
     padding-inline: 12px;
     font-size: 1.5rem;
+    white-space: nowrap;
+    margin-left: 10px;
+  }
+
+  @media (max-width: 500px) {
+    #quote-box {
+      width: 100%;
+      padding: 20px;
+    }
   }
 </style>
