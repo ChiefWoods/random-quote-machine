@@ -17,19 +17,23 @@
     "#17292b",
   ];
 
-  let text: string;
-  let author: string;
+  let text: string = "Fetching quote...";
+  let author: string = "";
 
   function getNewQuote() {
     fetch("https://quote-api-u0ka.onrender.com/api/quote/villain")
       .then((res) => res.json())
       .then((data) => {
-        text = data.quote;
-        author = data.name;
+        text = `"${data.quote}"`;
+        author = `- ${data.name}`;
 
         changeColor();
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error(err);
+        text = "404: Cannot fetch quote :(";
+        author = "";
+      });
   }
 
   function changeColor() {
@@ -41,15 +45,15 @@
 
   function generateTwitterLink(text: string, author: string): string {
     return `https://twitter.com/intent/tweet?hashtags=quotes&text=${encodeURIComponent(
-      `"${text}" ${author}`
+      `${text} ${author}`
     )}`;
   }
 
   function generateTumblrLink(text: string, author: string): string {
     return `https://www.tumblr.com/widgets/share/tool?posttype=quote&tags=quotes&caption=${encodeURIComponent(
-      author
+      author.slice(2)
     )}&content=${encodeURIComponent(
-      text
+      text.slice(1, -1) 
     )}&canonicalUrl=https%3A%2F%2Fwww.tumblr.com%2Fbuttons&shareSource=tumblr_share_button`;
   }
 
@@ -60,8 +64,8 @@
 
 <div id="quote-box">
   <blockquote>
-    <p id="text">"{text}"</p>
-    <span id="author">- {author}</span>
+    <p id="text">{text}</p>
+    <span id="author">{author}</span>
   </blockquote>
   <div id="btn-container">
     <div>
@@ -74,7 +78,7 @@
       <LogoBtn
         id="share-quote"
         icon={Tumblr}
-        href="{generateTumblrLink(text, author)},"
+        href={generateTumblrLink(text, author)}
         alt="Tumblr"
       />
     </div>

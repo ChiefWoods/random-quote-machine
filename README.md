@@ -63,9 +63,10 @@ View the [open issues](https://github.com/ChiefWoods/random-quote-machine/issues
 - [Pictogrammers](https://pictogrammers.com/)
 - [Font Awesome](https://fontawesome.com/icons)
 
-### Hosting
+### Hosting and API
 
 - [GitHub Pages](https://pages.github.com/)
+- [Quote API](https://github.com/ChiefWoods/quote-api)
 
 ## Contact
 
