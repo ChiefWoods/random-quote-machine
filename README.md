@@ -4,6 +4,8 @@
 
 Quote generator for Front End Development Libraries in [freeCodeCamp](https://www.freecodecamp.org/learn/).
 
+[Live Website](https://chiefwoods.github.io/random-quote-machine/)
+
 [Source Repository](https://github.com/ChiefWoods/random-quote-machine)
 
 ## Features
@@ -60,6 +62,10 @@ View the [open issues](https://github.com/ChiefWoods/random-quote-machine/issues
 - [Google Fonts](https://fonts.google.com/)
 - [Pictogrammers](https://pictogrammers.com/)
 - [Font Awesome](https://fontawesome.com/icons)
+
+### Hosting
+
+- [GitHub Pages](https://pages.github.com/)
 
 ## Contact
 
