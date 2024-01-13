@@ -21,7 +21,7 @@
   let author: string;
 
   function getNewQuote() {
-    fetch("http://localhost:8080/api/quote/villain")
+    fetch("http://localhost:8000/api/quote/villain")
       .then((res) => res.json())
       .then((data) => {
         text = data.quote;
