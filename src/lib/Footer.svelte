@@ -1,13 +1,12 @@
 <script lang="ts">
   import GitHub from "../assets/icons/github.svg";
+
+  const year = new Date().getFullYear();
 </script>
 
 <footer>
   <span class="made-by"
-    >Copyright @
-    <script>
-      document.write(new Date().getFullYear());
-    </script> ChiefWoods
+    >Copyright @ {year} ChiefWoods
   </span>
   <a
     class="github-link"
