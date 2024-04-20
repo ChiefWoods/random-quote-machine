@@ -42,12 +42,21 @@ npm install npm@latest -g
 ### Setup
 
 1. Clone the repository
+
 ```
 git clone https://github.com/ChiefWoods/random-quote-machine.git
 ```
+
 2. Install all dependencies
+
 ```
 npm install
+```
+
+3. Start development server
+
+```
+npm run dev
 ```
 
 ## Issues
