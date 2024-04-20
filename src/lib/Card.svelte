@@ -1,157 +1,181 @@
 <script lang="ts">
-  import LogoBtn from "./LogoBtn.svelte";
-  import Twitter from "../assets/icons/x-twitter.svg";
-  import Tumblr from "../assets/icons/tumblr.svg";
-  import { onMount } from "svelte";
+	import LogoBtn from "./LogoBtn.svelte";
+	import ControlBtn from "./ControlBtn.svelte";
+	import Twitter from "../assets/icons/x-twitter.svg";
+	import Tumblr from "../assets/icons/tumblr.svg";
+	import dice from "../assets/icons/dice-solid.svg";
+	import chevronLeft from "../assets/icons/chevron-left.svg";
+	import chevronRight from "../assets/icons/chevron-right.svg";
+	import { createEventDispatcher } from "svelte";
 
-  const colors = [
-    "#0d0e14",
-    "#252933",
-    "#404556",
-    "#60515c",
-    "#777076",
-    "#597d7c",
-    "#386775",
-    "#20504e",
-    "#193d31",
-    "#17292b",
-  ];
+	export let collectionType: string;
+	export let quote: Promise<any>;
+	export let fullQuotes: any[];
+	export let index: number;
 
-  let text: string = "Fetching quote...";
-  let author: string = "";
+	const dispatch = createEventDispatcher();
 
-  function getNewQuote() {
-    fetch("https://quote-api-u0ka.onrender.com/api/quote/villain")
-      .then((res) => res.json())
-      .then((data) => {
-        text = `"${data.quote}"`;
-        author = `- ${data.name}`;
+	function generateTwitterLink(text: string, author: string): string {
+		return `https://twitter.com/intent/tweet?hashtags=quotes&text=${encodeURIComponent(
+			`"${text}" - ${author}`
+		)}`;
+	}
 
-        changeColor();
-      })
-      .catch((err) => {
-        console.error(err);
-        text = "404: Cannot fetch quote :(";
-        author = "";
-      });
-  }
-
-  function changeColor() {
-    document.documentElement.style.setProperty(
-      "--current-color",
-      colors[Math.floor(Math.random() * colors.length)]
-    );
-  }
-
-  function generateTwitterLink(text: string, author: string): string {
-    return `https://twitter.com/intent/tweet?hashtags=quotes&text=${encodeURIComponent(
-      `${text} ${author}`
-    )}`;
-  }
-
-  function generateTumblrLink(text: string, author: string): string {
-    return `https://www.tumblr.com/widgets/share/tool?posttype=quote&tags=quotes&caption=${encodeURIComponent(
-      author.slice(2)
-    )}&content=${encodeURIComponent(
-      text.slice(1, -1) 
-    )}&canonicalUrl=https%3A%2F%2Fwww.tumblr.com%2Fbuttons&shareSource=tumblr_share_button`;
-  }
-
-  onMount(() => {
-    getNewQuote();
-  });
+	function generateTumblrLink(text: string, author: string): string {
+		return `https://www.tumblr.com/widgets/share/tool?posttype=quote&tags=quotes&caption=${encodeURIComponent(
+			author.slice(0)
+		)}&content=${encodeURIComponent(
+			text.slice(0)
+		)}&canonicalUrl=https%3A%2F%2Fwww.tumblr.com%2Fbuttons&shareSource=tumblr_share_button`;
+	}
 </script>
 
-<div id="quote-box">
-  <blockquote>
-    <p id="text">{text}</p>
-    <span id="author">{author}</span>
-  </blockquote>
-  <div id="btn-container">
-    <div>
-      <LogoBtn
-        id="tweet-quote"
-        icon={Twitter}
-        href={generateTwitterLink(text, author)}
-        alt="Twitter"
-      />
-      <LogoBtn
-        id="share-quote"
-        icon={Tumblr}
-        href={generateTumblrLink(text, author)}
-        alt="Tumblr"
-      />
-    </div>
-    <button id="new-quote" on:click={getNewQuote}>New Quote</button>
-  </div>
-</div>
+<section id="quote-box">
+	{#await quote}
+		<blockquote>
+			<p class="fetching">Fetching quote...</p>
+			<svg
+				class="loading-icon"
+				xmlns="http://www.w3.org/2000/svg"
+				viewBox="0 0 24 24"
+			>
+				<path d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z" />
+			</svg>
+		</blockquote>
+	{:then data}
+		<blockquote>
+			{#if collectionType === "single"}
+				<p id="text">"{data.quote}"</p>
+				<p id="author">- {data.name}</p>
+			{:else if collectionType === "full"}
+				<p id="title">Law {fullQuotes[index].id}: {fullQuotes[index].title}</p>
+				<p id="content">{fullQuotes[index].desc}</p>
+			{/if}
+		</blockquote>
+		<div id="btn-container">
+			{#if collectionType === "single"}
+				<div>
+					<LogoBtn
+						id="tweet-quote"
+						icon={Twitter}
+						href={generateTwitterLink(data.quote, data.name)}
+						alt="Twitter"
+					/>
+					<LogoBtn
+						id="share-quote"
+						icon={Tumblr}
+						href={generateTumblrLink(data.quote, data.name)}
+						alt="Tumblr"
+					/>
+				</div>
+				<ControlBtn
+					id="new-quote"
+					content={"New Quote"}
+					on:click={() => dispatch("newQuote")}
+				/>
+			{:else if collectionType === "full"}
+				<ControlBtn id="randomize" on:click={() => dispatch("randomize")}>
+					<img src={dice} alt="" />
+				</ControlBtn>
+				<div>
+					<ControlBtn id="previous-quote" on:click={() => dispatch("previous")}>
+						<img src={chevronLeft} alt="" />
+					</ControlBtn>
+					<ControlBtn id="next-quote" on:click={() => dispatch("next")}>
+						<img src={chevronRight} alt="" />
+					</ControlBtn>
+				</div>
+			{/if}
+		</div>
+	{:catch}
+		<blockquote>
+			<p class="error">Cannot fetch quotes. Try again later.</p>
+		</blockquote>
+	{/await}
+</section>
 
 <style>
-  @import url("https://fonts.googleapis.com/css2?family=Rubik:wght@300;400&display=swap");
+	@keyframes spin {
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
+	}
 
-  :global(:root) {
-    --current-color: black;
-    --transition-prop: all 1s;
-    --transition-duration: 1s;
-  }
+	#quote-box {
+		width: 500px;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		gap: 30px;
+		padding: 30px;
+		border-radius: 3px;
+		background: white;
+	}
 
-  #quote-box {
-    width: 500px;
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-    padding: 30px;
-    border-radius: 3px;
-    background: white;
-  }
+	blockquote {
+		display: flex;
+		flex-direction: column;
+		gap: 15px;
 
-  blockquote {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
+		& * {
+			color: var(--current-color);
+			transition: color var(--transition-duration);
+		}
 
-  p {
-    font-family: "Rubik", sans-serif;
-    font-size: 2.5rem;
-    color: var(--current-color);
-    text-align: center;
-    transition: color var(--transition-duration);
-  }
+		&:has(.fetching) {
+			flex-direction: row;
+			justify-content: center;
+		}
+	}
 
-  span {
-    font-family: "Rubik", sans-serif;
-    font-size: 2rem;
-    font-weight: 300;
-    color: var(--current-color);
-    margin-left: auto;
-    transition: color var(--transition-duration);
-  }
+	.fetching,
+	#text,
+	#title,
+	.error {
+		font-size: var(--font-size-l);
+		text-align: center;
+	}
 
-  #btn-container {
-    display: flex;
-    justify-content: space-between;
-  }
+	#author {
+		font-size: var(--font-size-m);
+		font-weight: 300;
+		margin-left: auto;
+	}
 
-  #btn-container > div {
-    display: flex;
-    gap: 10px;
-  }
+	#content {
+		font-size: var(--font-size-s);
+		text-align: justify;
+		max-height: 200px;
+		overflow-y: auto;
+	}
 
-  #new-quote {
-    color: white;
-    border: none;
-    cursor: pointer;
-    padding-inline: 12px;
-    font-size: 1.5rem;
-    white-space: nowrap;
-    margin-left: 10px;
-  }
+	#btn-container {
+		display: flex;
+		justify-content: space-between;
+	}
 
-  @media (max-width: 500px) {
-    #quote-box {
-      width: 100%;
-      padding: 20px;
-    }
-  }
+	#btn-container > div {
+		display: flex;
+		gap: 10px;
+	}
+
+	.loading-icon {
+		width: var(--font-size-m);
+		aspect-ratio: 1/1;
+		animation: spin 1s linear infinite;
+
+		& > path {
+			fill: var(--current-color);
+		}
+	}
+
+	@media (max-width: 768px) {
+		#quote-box {
+			max-width: 500px;
+			width: 100%;
+		}
+	}
 </style>
