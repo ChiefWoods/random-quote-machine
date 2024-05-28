@@ -9,6 +9,7 @@
 	import { createEventDispatcher } from "svelte";
 
 	export let collectionType: string;
+	export let collectionName: string;
 	export let quote: Promise<any>;
 	export let fullQuotes: any[];
 	export let index: number;
@@ -48,7 +49,10 @@
 				<p id="text">"{data.quote}"</p>
 				<p id="author">- {data.name}</p>
 			{:else if collectionType === "full"}
-				<p id="title">Law {fullQuotes[index].id}: {fullQuotes[index].title}</p>
+				<p id="title">
+					{collectionName === "48laws" ? `Law ${fullQuotes[index].id}: ` : ""}
+					{fullQuotes[index].title}
+				</p>
 				<p id="content">{fullQuotes[index].desc}</p>
 			{/if}
 		</blockquote>

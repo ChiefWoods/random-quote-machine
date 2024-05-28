@@ -11,8 +11,25 @@
 	}
 
 	const collections: Record<string, Collection[]> = {
-		single: [{ type: "single", name: "villains", option: "Villains" }],
-		full: [{ type: "full", name: "48laws", option: "48 Laws of Power" }],
+		single: [
+			{
+				type: "single",
+				name: "villains",
+				option: "Villains",
+			},
+		],
+		full: [
+			{
+				type: "full",
+				name: "48laws",
+				option: "48 Laws of Power",
+			},
+			{
+				type: "full",
+				name: "33strategies",
+				option: "33 Strategies of War",
+			},
+		],
 	};
 
 	const colors: Record<string, string[]> = {
@@ -29,6 +46,7 @@
 			"#17292b",
 		],
 		"48laws": ["#c64911", "#180145", "#acb117"],
+		"33strategies": ["#3c4d47", "#c31a1f"],
 	};
 
 	let currentColor: string = "#000";
@@ -136,6 +154,7 @@
 	</select>
 	<Card
 		collectionType={currentCollection.type}
+		collectionName={currentCollection.name}
 		{quote}
 		{fullQuotes}
 		index={$index}
