@@ -1,173 +1,119 @@
 <script lang="ts">
+	import {
+		type Collection,
+		getCollectionNames,
+		getCollection,
+		isVillains,
+		type Quote,
+		type CollectionName,
+	} from "./lib/collection.ts";
+	import { writable, type Writable } from "svelte/store";
 	import Card from "./lib/Card.svelte";
 	import Footer from "./lib/Footer.svelte";
-	import { getRandomQuote, getAllQuotes } from "./lib/util.ts";
-	import { writable, type Writable } from "svelte/store";
+	import Select from "./lib/Select.svelte";
 
-	interface Collection {
-		type: "single" | "full";
-		name: string;
-		option: string;
-	}
-
-	const collections: Record<string, Collection[]> = {
-		single: [
-			{
-				type: "single",
-				name: "villains",
-				option: "Villains",
-			},
-		],
-		full: [
-			{
-				type: "full",
-				name: "48laws",
-				option: "48 Laws of Power",
-			},
-			{
-				type: "full",
-				name: "33strategies",
-				option: "33 Strategies of War",
-			},
-		],
-	};
-
-	const colors: Record<string, string[]> = {
-		villains: [
-			"#0d0e14",
-			"#252933",
-			"#404556",
-			"#60515c",
-			"#777076",
-			"#597d7c",
-			"#386775",
-			"#20504e",
-			"#193d31",
-			"#17292b",
-		],
-		"48laws": ["#c64911", "#180145", "#acb117"],
-		"33strategies": ["#3c4d47", "#c31a1f"],
-	};
-
-	let currentColor: string = "#000";
-	let currentCollection: Collection = collections["single"][0];
-	let quote: Promise<any>;
-	let fullQuotes: any[];
+	let allCollections: Promise<CollectionName[]> = getCollectionNames();
+	let currentCollection: Collection;
 	let index: Writable<number> = writable(0);
+	let quote: Promise<Quote>;
+	let currentColor: string = "#fff";
 
-	$: if (quote !== undefined) {
-		pickRandomColor();
+	$: if (currentCollection) {
+		quote = Promise.resolve(currentCollection.quotes[$index]);
+		changeColor();
 	}
 
-	$: if (fullQuotes) {
-		quote = fullQuotes[$index];
+	function randomizer(arr: any[]): number {
+		return Math.floor(Math.random() * arr.length);
 	}
 
-	async function updateQuote() {
-		if (currentCollection.type === "single") {
-			quote = getRandomQuote(currentCollection.name);
-		} else {
-			quote = getAllQuotes(currentCollection.name).then((quotes) => {
-				fullQuotes = quotes;
-				return quotes[$index];
-			});
-		}
-	}
-
-	async function updateCollection(event: Event) {
-		const target = event.target as HTMLSelectElement;
-
-		for (const [key, value] of Object.entries(collections)) {
-			const collection = value.find(
-				(collection) => collection.name === target.value
-			);
-
-			if (collection) {
-				currentCollection = collection;
-				break;
-			}
-		}
-
-		updateQuote();
-	}
-
-	function pickRandomColor() {
-		const colorGroup: string[] = colors[currentCollection.name];
+	function changeColor() {
+		const colorGroup: string[] = currentCollection.colors;
 		let temp: string;
 
 		do {
-			temp = colorGroup[Math.floor(Math.random() * colorGroup.length)];
+			temp = colorGroup[randomizer(colorGroup)];
 		} while (temp === currentColor);
 
 		currentColor = temp;
+
 		document.documentElement.style.setProperty("--current-color", currentColor);
 	}
 
-	async function showNewQuote() {
-		let temp: Promise<any>;
+	async function changeCollection(event: Event) {
+		const target = event.target as HTMLSelectElement;
 
-		do {
-			temp = await getRandomQuote(currentCollection.name);
-		} while (temp === quote);
+		const names = (await allCollections).map(({ name }) => name);
 
-		quote = temp;
+		const selectedName = names.find((name) => name === target.value);
+
+		if (selectedName) {
+			await setQuote(selectedName);
+		}
 	}
 
-	async function showRandomQuote() {
+	async function setQuote(name: string) {
+		quote = getCollection(name).then((col) => {
+			currentCollection = col;
+			index.set(randomizer(col.quotes));
+			return col.quotes[$index];
+		});
+	}
+
+	function setRandomQuote() {
 		index.update((i) => {
 			let j: number;
 
 			do {
-				j = Math.floor(Math.random() * fullQuotes.length);
+				j = Math.floor(Math.random() * currentCollection.quotes.length);
 			} while (j === i);
 
 			return j;
 		});
 	}
 
-	async function showPreviousQuote() {
+	function setPreviousQuote() {
 		index.update((i) => {
 			if (i === 0) {
-				return fullQuotes.length - 1;
+				return currentCollection.quotes.length - 1;
 			} else {
 				return i - 1;
 			}
 		});
 	}
 
-	async function showNextQuote() {
-		index.update((i) => (i + 1) % fullQuotes.length);
+	function setNextQuote() {
+		index.update((i) => (i + 1) % currentCollection.quotes.length);
 	}
 
-	updateQuote();
+	setQuote("villains");
 </script>
 
 <main>
-	<select name="collection" id="" on:change={(e) => updateCollection(e)}>
-		{#each Object.entries(collections) as [_, collection]}
-			{#each collection as { option, name }}
-				<option value={name} selected={currentCollection.name === name}
-					>{option}</option
-				>
-			{/each}
-		{/each}
-	</select>
+	{#await allCollections then collections}
+		<Select {collections} on:change={changeCollection} />
+	{/await}
 	<Card
-		collectionType={currentCollection.type}
-		collectionName={currentCollection.name}
 		{quote}
-		{fullQuotes}
-		index={$index}
-		on:newQuote={showNewQuote}
-		on:randomize={showRandomQuote}
-		on:previous={showPreviousQuote}
-		on:next={showNextQuote}
+		randomOnly={isVillains(currentCollection?.fullName)}
+		on:randomQuote={setRandomQuote}
+		on:previousQuote={setPreviousQuote}
+		on:nextQuote={setNextQuote}
 	/>
 </main>
 <Footer />
 
 <style>
 	@import url("https://fonts.googleapis.com/css2?family=Rubik:wght@300;400&display=swap");
+
+	@keyframes spin {
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
+	}
 
 	:root {
 		--current-color: black;
@@ -187,18 +133,5 @@
 		& * {
 			font-family: "Rubik", sans-serif;
 		}
-	}
-
-	select {
-		position: absolute;
-		top: 30px;
-		right: 30px;
-		cursor: pointer;
-		min-width: 175px;
-		border-radius: 3px;
-		border: none;
-		font-size: var(--font-size-s);
-		color: var(--current-color);
-		transition: color var(--transition-duration);
 	}
 </style>

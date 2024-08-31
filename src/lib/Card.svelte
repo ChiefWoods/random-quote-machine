@@ -1,18 +1,16 @@
 <script lang="ts">
-	import LogoBtn from "./LogoBtn.svelte";
+	import { createEventDispatcher } from "svelte";
+	import type { Quote } from "./collection";
 	import ControlBtn from "./ControlBtn.svelte";
+	import LogoBtn from "./LogoBtn.svelte";
 	import Twitter from "../assets/icons/x-twitter.svg";
 	import Tumblr from "../assets/icons/tumblr.svg";
 	import dice from "../assets/icons/dice-solid.svg";
 	import chevronLeft from "../assets/icons/chevron-left.svg";
 	import chevronRight from "../assets/icons/chevron-right.svg";
-	import { createEventDispatcher } from "svelte";
 
-	export let collectionType: string;
-	export let collectionName: string;
-	export let quote: Promise<any>;
-	export let fullQuotes: any[];
-	export let index: number;
+	export let quote: Promise<Quote>;
+	export let randomOnly: Boolean = false;
 
 	const dispatch = createEventDispatcher();
 
@@ -45,51 +43,45 @@
 		</blockquote>
 	{:then data}
 		<blockquote>
-			{#if collectionType === "single"}
-				<p id="text">"{data.quote}"</p>
-				<p id="author">- {data.name}</p>
-			{:else if collectionType === "full"}
-				<p id="title">
-					{collectionName === "48laws" ? `Law ${fullQuotes[index].id}: ` : ""}
-					{fullQuotes[index].title}
-				</p>
-				<p id="content">{fullQuotes[index].desc}</p>
+			{#if randomOnly}
+				<p id="text">"{data.desc}"</p>
+				<p id="author">- {data.title}</p>
+			{:else}
+				<p id="title">{data.title}</p>
+				<p id="desc">{data.desc}</p>
 			{/if}
 		</blockquote>
 		<div id="btn-container">
-			{#if collectionType === "single"}
-				<div>
-					<LogoBtn
-						id="tweet-quote"
-						icon={Twitter}
-						href={generateTwitterLink(data.quote, data.name)}
-						alt="Twitter"
-					/>
-					<LogoBtn
-						id="share-quote"
-						icon={Tumblr}
-						href={generateTumblrLink(data.quote, data.name)}
-						alt="Tumblr"
-					/>
-				</div>
-				<ControlBtn
-					id="new-quote"
-					content={"New Quote"}
-					on:click={() => dispatch("newQuote")}
+			<div>
+				<LogoBtn
+					id="tweet-quote"
+					icon={Twitter}
+					href={generateTwitterLink(data.desc, data.title)}
+					alt="Twitter"
 				/>
-			{:else if collectionType === "full"}
-				<ControlBtn id="randomize" on:click={() => dispatch("randomize")}>
-					<img src={dice} alt="" />
+				<LogoBtn
+					id="share-quote"
+					icon={Tumblr}
+					href={generateTumblrLink(data.desc, data.title)}
+					alt="Tumblr"
+				/>
+			</div>
+			<div>
+				<ControlBtn id="randomize" on:click={() => dispatch("randomQuote")}>
+					<img src={dice} alt="Random Quote" />
 				</ControlBtn>
-				<div>
-					<ControlBtn id="previous-quote" on:click={() => dispatch("previous")}>
-						<img src={chevronLeft} alt="" />
+				{#if !randomOnly}
+					<ControlBtn
+						id="previous-quote"
+						on:click={() => dispatch("previousQuote")}
+					>
+						<img src={chevronLeft} alt="Previous Quote" />
 					</ControlBtn>
-					<ControlBtn id="next-quote" on:click={() => dispatch("next")}>
-						<img src={chevronRight} alt="" />
+					<ControlBtn id="next-quote" on:click={() => dispatch("nextQuote")}>
+						<img src={chevronRight} alt="Next Quote" />
 					</ControlBtn>
-				</div>
-			{/if}
+				{/if}
+			</div>
 		</div>
 	{:catch}
 		<blockquote>
@@ -99,15 +91,6 @@
 </section>
 
 <style>
-	@keyframes spin {
-		0% {
-			transform: rotate(0deg);
-		}
-		100% {
-			transform: rotate(360deg);
-		}
-	}
-
 	#quote-box {
 		width: 500px;
 		display: flex;
@@ -149,7 +132,7 @@
 		margin-left: auto;
 	}
 
-	#content {
+	#desc {
 		font-size: var(--font-size-s);
 		text-align: justify;
 		max-height: 200px;
