@@ -14,18 +14,16 @@
 
 	const dispatch = createEventDispatcher();
 
-	function generateTwitterLink(text: string, author: string): string {
+	function generateTwitterLink(text: string, title: string): string {
 		return `https://twitter.com/intent/tweet?hashtags=quotes&text=${encodeURIComponent(
-			`"${text}" - ${author}`
+			`"${text}" - ${title}`
 		)}`;
 	}
 
-	function generateTumblrLink(text: string, author: string): string {
-		return `https://www.tumblr.com/widgets/share/tool?posttype=quote&tags=quotes&caption=${encodeURIComponent(
-			author.slice(0)
-		)}&content=${encodeURIComponent(
-			text.slice(0)
-		)}&canonicalUrl=https%3A%2F%2Fwww.tumblr.com%2Fbuttons&shareSource=tumblr_share_button`;
+	function generateTumblrLink(text: string, title: string): string {
+		return `https://www.tumblr.com/widgets/share/tool?posttype=quote&tags=quotes&caption=${encodeURIComponent(title)}
+		&content=${encodeURIComponent(text)}
+		&canonicalUrl=https%3A%2F%2Fwww.tumblr.com%2Fbuttons&shareSource=tumblr_share_button`;
 	}
 </script>
 
