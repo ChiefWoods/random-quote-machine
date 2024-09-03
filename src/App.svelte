@@ -106,15 +106,6 @@
 <style>
 	@import url("https://fonts.googleapis.com/css2?family=Rubik:wght@300;400&display=swap");
 
-	@keyframes spin {
-		0% {
-			transform: rotate(0deg);
-		}
-		100% {
-			transform: rotate(360deg);
-		}
-	}
-
 	:root {
 		--current-color: black;
 		--transition-duration: 1s;
