@@ -22,5 +22,6 @@
 		font-size: var(--font-size-s);
 		color: var(--current-color);
 		transition: color var(--transition-duration);
+		padding-left: 0.5rem;
 	}
 </style>
