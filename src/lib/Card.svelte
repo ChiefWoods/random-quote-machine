@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from "svelte";
-	import type { Quote } from "./collection";
+	import type { Quote } from "../types/collection";
 	import ControlBtn from "./ControlBtn.svelte";
 	import LogoBtn from "./LogoBtn.svelte";
 	import Twitter from "../assets/icons/x-twitter.svg";

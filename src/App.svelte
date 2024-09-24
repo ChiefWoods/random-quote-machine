@@ -1,12 +1,14 @@
 <script lang="ts">
+	import type {
+		Collection,
+		Quote,
+		CollectionName,
+	} from "./types/collection";
 	import {
-		type Collection,
 		getCollectionNames,
 		getCollection,
 		isVillains,
-		type Quote,
-		type CollectionName,
-	} from "./lib/collection.ts";
+	} from "./lib/collection";
 	import { writable, type Writable } from "svelte/store";
 	import Card from "./lib/Card.svelte";
 	import Footer from "./lib/Footer.svelte";

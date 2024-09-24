@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { CollectionName } from "./collection";
+	import type { CollectionName } from "../types/collection";
 
 	export let collections: CollectionName[];
 </script>
