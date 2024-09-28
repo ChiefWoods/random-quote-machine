@@ -10,18 +10,27 @@
 	import chevronRight from "../assets/icons/chevron-right.svg";
 
 	export let quote: Promise<Quote>;
+	export let villains: Boolean = false;
 	export let randomOnly: Boolean = false;
 
 	const dispatch = createEventDispatcher();
 
 	function generateTwitterLink(text: string, title: string): string {
-		return `https://twitter.com/intent/tweet?hashtags=quotes&text=${encodeURIComponent(
-			`"${text}" - ${title}`
-		)}`;
+		return villains
+			? `https://twitter.com/intent/tweet?hashtags=quotes&text=${encodeURIComponent(
+					`"${title}" - ${text}`
+				)}`
+			: `https://twitter.com/intent/tweet?hashtags=quotes&text=${encodeURIComponent(
+					`"${text}" - ${title}`
+				)}`;
 	}
 
 	function generateTumblrLink(text: string, title: string): string {
-		return `https://www.tumblr.com/widgets/share/tool?posttype=quote&tags=quotes&caption=${encodeURIComponent(title)}
+		return villains
+			? `https://www.tumblr.com/widgets/share/tool?posttype=quote&tags=quotes&caption=${encodeURIComponent(text)}
+		&content=${encodeURIComponent(title)}
+		&canonicalUrl=https%3A%2F%2Fwww.tumblr.com%2Fbuttons&shareSource=tumblr_share_button`
+			: `https://www.tumblr.com/widgets/share/tool?posttype=quote&tags=quotes&caption=${encodeURIComponent(title)}
 		&content=${encodeURIComponent(text)}
 		&canonicalUrl=https%3A%2F%2Fwww.tumblr.com%2Fbuttons&shareSource=tumblr_share_button`;
 	}
@@ -41,30 +50,34 @@
 		</blockquote>
 	{:then data}
 		<blockquote>
-			{#if randomOnly}
-				<p id="text">"{data.desc}"</p>
-				<p id="author">- {data.title}</p>
+			{#if villains}
+				<p id="text">"{data.title}"</p>
+				<p id="author">- {data.desc}</p>
 			{:else}
 				<p id="title">{data.title}</p>
-				<p id="desc">{data.desc}</p>
+				{#if data.desc}
+					<p id="desc">{data.desc}</p>
+				{/if}
 			{/if}
 		</blockquote>
 		<div id="btn-container">
-			<div>
-				<LogoBtn
-					id="tweet-quote"
-					icon={Twitter}
-					href={generateTwitterLink(data.desc, data.title)}
-					alt="Twitter"
-				/>
-				<LogoBtn
-					id="share-quote"
-					icon={Tumblr}
-					href={generateTumblrLink(data.desc, data.title)}
-					alt="Tumblr"
-				/>
-			</div>
-			<div>
+			{#if data.desc}
+				<div>
+					<LogoBtn
+						id="tweet-quote"
+						icon={Twitter}
+						href={generateTwitterLink(data.desc, data.title)}
+						alt="Twitter"
+					/>
+					<LogoBtn
+						id="share-quote"
+						icon={Tumblr}
+						href={generateTumblrLink(data.desc, data.title)}
+						alt="Tumblr"
+					/>
+				</div>
+			{/if}
+			<div class="control">
 				<ControlBtn id="randomize" on:click={() => dispatch("randomQuote")}>
 					<img src={dice} alt="Random Quote" />
 				</ControlBtn>
@@ -149,11 +162,15 @@
 	#btn-container {
 		display: flex;
 		justify-content: space-between;
-	}
 
-	#btn-container > div {
-		display: flex;
-		gap: 10px;
+		& > div {
+			display: flex;
+			gap: 10px;
+		}
+
+		& > .control {
+			margin-left: auto;
+		}
 	}
 
 	.loading-icon {

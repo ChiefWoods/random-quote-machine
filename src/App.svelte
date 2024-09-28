@@ -7,6 +7,7 @@
 	import {
 		getCollectionNames,
 		getCollection,
+		isRandomOnly,
 		isVillains,
 	} from "./lib/collection";
 	import { writable, type Writable } from "svelte/store";
@@ -97,7 +98,8 @@
 	{/await}
 	<Card
 		{quote}
-		randomOnly={isVillains(currentCollection?.fullName)}
+		villains={isVillains(currentCollection?.fullName)}
+		randomOnly={isRandomOnly(currentCollection?.fullName)}
 		on:randomQuote={setRandomQuote}
 		on:previousQuote={setPreviousQuote}
 		on:nextQuote={setNextQuote}

@@ -14,4 +14,3 @@ export interface CollectionName {
   name: string;
   fullName: string;
 }
-

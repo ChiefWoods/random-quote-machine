@@ -15,3 +15,10 @@ export function getCollectionNames(): Promise<CollectionName[]> {
 export function isVillains(fullName: string): Boolean {
   return fullName === "Villains";
 }
+
+export function isRandomOnly(fullName: string): Boolean {
+  return [
+    "Villains",
+    "How to Win Friends and Influence People",
+  ].includes(fullName);
+}
