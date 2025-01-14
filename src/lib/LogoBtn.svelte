@@ -1,14 +1,23 @@
 <script lang="ts">
-	export let id: string;
-	export let icon: string;
-	export let href: string;
-	export let alt: string;
+  import BtnIcon from "./BtnIcon.svelte";
+
+  let {
+    id,
+    href,
+    src,
+    alt,
+  }: {
+    id: string;
+    href: string;
+    src: string;
+    alt: string;
+  } = $props();
 </script>
 
 <a {id} class="btn" {href} target="_blank">
-	<img src={icon} {alt} />
+  <BtnIcon {src} {alt} />
 </a>
 
 <style>
-	@import "../assets/styles/btn.css";
+  @import "../styles/btn.css";
 </style>

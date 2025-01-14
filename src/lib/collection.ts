@@ -1,24 +1,15 @@
-import type { Collection, CollectionName } from "../types/collection";
+import type { Collection } from "../types/collection";
 
-export function getCollection(name: string): Promise<Collection> {
-  return fetch(`${import.meta.env.VITE_QUOTE_API_URL}/api/collections/${name}`)
-    .then((res) => res.json())
-    .then((data) => data)
+export async function getCollectionNames(): Promise<
+  Pick<Collection, "id" | "name">[]
+  > {
+  return await fetch(`${import.meta.env.VITE_QUOTE_API_URL}/collections`).then(
+    (res) => res.json(),
+  );
 }
 
-export function getCollectionNames(): Promise<CollectionName[]> {
-  return fetch(`${import.meta.env.VITE_QUOTE_API_URL}/api/collections`)
-    .then((res) => res.json())
-    .then((data) => data)
-}
-
-export function isVillains(fullName: string): Boolean {
-  return fullName === "Villains";
-}
-
-export function isRandomOnly(fullName: string): Boolean {
-  return [
-    "Villains",
-    "How to Win Friends and Influence People",
-  ].includes(fullName);
+export async function getCollection(id: number): Promise<Collection> {
+  return await fetch(
+    `${import.meta.env.VITE_QUOTE_API_URL}/collections/${id}`,
+  ).then((res) => res.json());
 }

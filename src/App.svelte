@@ -1,132 +1,169 @@
 <script lang="ts">
-	import type {
-		Collection,
-		Quote,
-		CollectionName,
-	} from "./types/collection";
-	import {
-		getCollectionNames,
-		getCollection,
-		isRandomOnly,
-		isVillains,
-	} from "./lib/collection";
-	import { writable, type Writable } from "svelte/store";
-	import Card from "./lib/Card.svelte";
-	import Footer from "./lib/Footer.svelte";
-	import Select from "./lib/Select.svelte";
+  import type { Collection, Quote } from "./types/collection";
+  import { getCollectionNames, getCollection } from "./lib/collection";
+  import Card from "./lib/Card.svelte";
+  import Footer from "./lib/Footer.svelte";
+  import Select from "./lib/Select.svelte";
+  import { getRandomIndex } from "./lib/utils";
 
-	let allCollections: Promise<CollectionName[]> = getCollectionNames();
-	let currentCollection: Collection;
-	let index: Writable<number> = writable(0);
-	let quote: Promise<Quote>;
-	let currentColor: string = "#fff";
+  let index: number = $state(0);
+  let availableCollections: Promise<Pick<Collection, "id" | "name">[]> =
+    $state(getCollectionNames());
+  let currentCollection: Collection = $state() as Collection;
+  let quote: Quote = $state() as Quote;
+  let currentColor: string = "#fff";
 
-	$: if (currentCollection) {
-		quote = Promise.resolve(currentCollection.quotes[$index]);
-		changeColor();
-	}
+  function changeColor() {
+    const colorGroup: string[] = currentCollection.colors;
+    let temp: string;
 
-	function randomizer(arr: any[]): number {
-		return Math.floor(Math.random() * arr.length);
-	}
+    do {
+      temp = colorGroup[getRandomIndex(colorGroup)];
+    } while (temp === currentColor);
 
-	function changeColor() {
-		const colorGroup: string[] = currentCollection.colors;
-		let temp: string;
+    currentColor = temp;
 
-		do {
-			temp = colorGroup[randomizer(colorGroup)];
-		} while (temp === currentColor);
+    document.documentElement.style.setProperty("--current-color", currentColor);
+  }
 
-		currentColor = temp;
+  async function changeCollection(event: Event) {
+    const target = event.target as HTMLSelectElement;
 
-		document.documentElement.style.setProperty("--current-color", currentColor);
-	}
+    const ids = (await availableCollections).map(({ id }) => id);
 
-	async function changeCollection(event: Event) {
-		const target = event.target as HTMLSelectElement;
+    const selectedCollectionId = ids.find((id) => id === Number(target.value));
 
-		const names = (await allCollections).map(({ name }) => name);
+    if (selectedCollectionId) {
+      await setQuote(selectedCollectionId);
+    }
+  }
 
-		const selectedName = names.find((name) => name === target.value);
+  async function setQuote(id: number) {
+    const col = await getCollection(id);
+    currentCollection = col;
+    index = getRandomIndex(col.quotes);
+    quote = col.quotes[index];
+  }
 
-		if (selectedName) {
-			await setQuote(selectedName);
-		}
-	}
+  function setRandomQuote() {
+    let temp: number;
 
-	async function setQuote(name: string) {
-		quote = getCollection(name).then((col) => {
-			currentCollection = col;
-			index.set(randomizer(col.quotes));
-			return col.quotes[$index];
-		});
-	}
+    do {
+      temp = getRandomIndex(currentCollection.quotes);
+    } while (temp === index);
 
-	function setRandomQuote() {
-		index.update((i) => {
-			let j: number;
+    index = temp;
+  }
 
-			do {
-				j = Math.floor(Math.random() * currentCollection.quotes.length);
-			} while (j === i);
+  function setPreviousQuote() {
+    index = index === 0 ? currentCollection.quotes.length - 1 : index - 1;
+  }
 
-			return j;
-		});
-	}
+  function setNextQuote() {
+    index = (index + 1) % currentCollection.quotes.length;
+  }
 
-	function setPreviousQuote() {
-		index.update((i) => {
-			if (i === 0) {
-				return currentCollection.quotes.length - 1;
-			} else {
-				return i - 1;
-			}
-		});
-	}
+  $effect(() => {
+    if (currentCollection) {
+      quote = currentCollection.quotes[index];
+      changeColor();
+    }
+  });
 
-	function setNextQuote() {
-		index.update((i) => (i + 1) % currentCollection.quotes.length);
-	}
-
-	setQuote("villains");
+  availableCollections.then((col) => {
+    setQuote(col[0].id);
+  });
 </script>
 
 <main>
-	{#await allCollections then collections}
-		<Select {collections} on:change={changeCollection} />
-	{/await}
-	<Card
-		{quote}
-		villains={isVillains(currentCollection?.fullName)}
-		randomOnly={isRandomOnly(currentCollection?.fullName)}
-		on:randomQuote={setRandomQuote}
-		on:previousQuote={setPreviousQuote}
-		on:nextQuote={setNextQuote}
-	/>
+  {#snippet loading()}
+    <div>
+      <p class="fetching">Fetching quote...</p>
+      <svg
+        class="loading-icon"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+      >
+        <path d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z" />
+      </svg>
+    </div>
+  {/snippet}
+
+  {#await availableCollections}
+    {@render loading()}
+  {:then collections}
+    {#if currentCollection}
+      <Select {collections} onchange={changeCollection} />
+      <Card
+        {quote}
+        isVillains={currentCollection.name === "Villains"}
+        onRandomQuote={setRandomQuote}
+        onPreviousQuote={setPreviousQuote}
+        onNextQuote={setNextQuote}
+      />
+    {:else}
+      {@render loading()}
+    {/if}
+  {:catch err}
+    <div>
+      <p class="error">Unable to fetch quotes. Try again later.</p>
+    </div>
+  {/await}
 </main>
 <Footer />
 
 <style>
-	@import url("https://fonts.googleapis.com/css2?family=Rubik:wght@300;400&display=swap");
+  @import url("https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
 
-	:root {
-		--current-color: black;
-		--transition-duration: 1s;
-		--font-size-l: 2.5rem;
-		--font-size-m: 2rem;
-		--font-size-s: 1.5rem;
-	}
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
 
-	main {
-		background: var(--current-color);
-		flex: 1;
-		display: grid;
-		place-items: center;
-		transition: background var(--transition-duration);
+  :root {
+    --current-color: black;
+    --transition-duration: 1s;
+    --font-size-l: 2.5rem;
+    --font-size-m: 2rem;
+    --font-size-s: 1.5rem;
+  }
 
-		& * {
-			font-family: "Rubik", sans-serif;
-		}
-	}
+  main {
+    background: var(--current-color);
+    flex: 1;
+    display: grid;
+    place-items: center;
+    transition: background var(--transition-duration);
+    font-family: "Rubik", sans-serif;
+  }
+
+  div {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 1.5rem;
+    background: white;
+    padding: 30px;
+    border-radius: 3px;
+  }
+
+  .loading-icon {
+    width: var(--font-size-m);
+    aspect-ratio: 1/1;
+    animation: spin 1s linear infinite;
+
+    & > path {
+      fill: var(--current-color);
+    }
+  }
+
+  .fetching,
+  .error {
+    font-size: var(--font-size-l);
+    text-align: center;
+  }
 </style>

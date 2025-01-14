@@ -1,17 +1,23 @@
 <script lang="ts">
-	export let id: string | null = null;
-	export let content: string = "";
+  import BtnIcon from "./BtnIcon.svelte";
+
+  let {
+    id,
+    src,
+    alt,
+    onclick,
+  }: {
+    id: string;
+    src: string;
+    alt: string;
+    onclick: () => void;
+  } = $props();
 </script>
 
-<button {id} class="btn" on:click>
-	{content}
-	<slot />
+<button {id} class="btn" {onclick}>
+  <BtnIcon {src} {alt} />
 </button>
 
 <style>
-	@import "../assets/styles/btn.css";
-
-	button {
-		padding-inline: 12px;
-	}
+  @import "../styles/btn.css";
 </style>

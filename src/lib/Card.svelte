@@ -1,192 +1,147 @@
 <script lang="ts">
-	import { createEventDispatcher } from "svelte";
-	import type { Quote } from "../types/collection";
-	import ControlBtn from "./ControlBtn.svelte";
-	import LogoBtn from "./LogoBtn.svelte";
-	import Twitter from "../assets/icons/x-twitter.svg";
-	import Tumblr from "../assets/icons/tumblr.svg";
-	import dice from "../assets/icons/dice-solid.svg";
-	import chevronLeft from "../assets/icons/chevron-left.svg";
-	import chevronRight from "../assets/icons/chevron-right.svg";
+  import type { Quote } from "../types/collection";
+  import ControlBtn from "./ControlBtn.svelte";
+  import LogoBtn from "./LogoBtn.svelte";
+  import twitter from "../assets/icons/x-twitter.svg";
+  import tumblr from "../assets/icons/tumblr.svg";
+  import dice from "../assets/icons/dice-solid.svg";
+  import chevronLeft from "../assets/icons/chevron-left.svg";
+  import chevronRight from "../assets/icons/chevron-right.svg";
 
-	export let quote: Promise<Quote>;
-	export let villains: Boolean = false;
-	export let randomOnly: Boolean = false;
+  let {
+    quote,
+    isVillains,
+    onRandomQuote,
+    onPreviousQuote,
+    onNextQuote,
+  }: {
+    quote: Quote;
+    isVillains: boolean;
+    onRandomQuote: () => void;
+    onPreviousQuote: () => void;
+    onNextQuote: () => void;
+  } = $props();
 
-	const dispatch = createEventDispatcher();
+  function generateTwitterLink(text: string, title: string): string {
+    return `https://twitter.com/intent/tweet?hashtags=quotes&text=${encodeURIComponent(
+      `"${title}" - ${text}`,
+    )}`;
+  }
 
-	function generateTwitterLink(text: string, title: string): string {
-		return villains
-			? `https://twitter.com/intent/tweet?hashtags=quotes&text=${encodeURIComponent(
-					`"${title}" - ${text}`
-				)}`
-			: `https://twitter.com/intent/tweet?hashtags=quotes&text=${encodeURIComponent(
-					`"${text}" - ${title}`
-				)}`;
-	}
-
-	function generateTumblrLink(text: string, title: string): string {
-		return villains
-			? `https://www.tumblr.com/widgets/share/tool?posttype=quote&tags=quotes&caption=${encodeURIComponent(text)}
+  function generateTumblrLink(text: string, title: string): string {
+    return `https://www.tumblr.com/widgets/share/tool?posttype=quote&tags=quotes&caption=${encodeURIComponent(text)}
 		&content=${encodeURIComponent(title)}
-		&canonicalUrl=https%3A%2F%2Fwww.tumblr.com%2Fbuttons&shareSource=tumblr_share_button`
-			: `https://www.tumblr.com/widgets/share/tool?posttype=quote&tags=quotes&caption=${encodeURIComponent(title)}
-		&content=${encodeURIComponent(text)}
 		&canonicalUrl=https%3A%2F%2Fwww.tumblr.com%2Fbuttons&shareSource=tumblr_share_button`;
-	}
+  }
 </script>
 
 <section id="quote-box">
-	{#await quote}
-		<blockquote>
-			<p class="fetching">Fetching quote...</p>
-			<svg
-				class="loading-icon"
-				xmlns="http://www.w3.org/2000/svg"
-				viewBox="0 0 24 24"
-			>
-				<path d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z" />
-			</svg>
-		</blockquote>
-	{:then data}
-		<blockquote>
-			{#if villains}
-				<p id="text">"{data.title}"</p>
-				<p id="author">- {data.desc}</p>
-			{:else}
-				<p id="title">{data.title}</p>
-				{#if data.desc}
-					<p id="desc">{data.desc}</p>
-				{/if}
-			{/if}
-		</blockquote>
-		<div id="btn-container">
-			{#if data.desc}
-				<div>
-					<LogoBtn
-						id="tweet-quote"
-						icon={Twitter}
-						href={generateTwitterLink(data.desc, data.title)}
-						alt="Twitter"
-					/>
-					<LogoBtn
-						id="share-quote"
-						icon={Tumblr}
-						href={generateTumblrLink(data.desc, data.title)}
-						alt="Tumblr"
-					/>
-				</div>
-			{/if}
-			<div class="control">
-				<ControlBtn id="randomize" on:click={() => dispatch("randomQuote")}>
-					<img src={dice} alt="Random Quote" />
-				</ControlBtn>
-				{#if !randomOnly}
-					<ControlBtn
-						id="previous-quote"
-						on:click={() => dispatch("previousQuote")}
-					>
-						<img src={chevronLeft} alt="Previous Quote" />
-					</ControlBtn>
-					<ControlBtn id="next-quote" on:click={() => dispatch("nextQuote")}>
-						<img src={chevronRight} alt="Next Quote" />
-					</ControlBtn>
-				{/if}
-			</div>
-		</div>
-	{:catch}
-		<blockquote>
-			<p class="error">Cannot fetch quotes. Try again later.</p>
-		</blockquote>
-	{/await}
+  <blockquote>
+    {#if isVillains}
+      <p id="text">"{quote.main}"</p>
+      <p id="author">- {quote.sub}</p>
+    {:else}
+      <p id="main">{quote.main}</p>
+      {#if quote.sub}
+        <p id="sub">{quote.sub}</p>
+      {/if}
+    {/if}
+  </blockquote>
+  <div id="btn-container">
+    <div>
+      {#if isVillains && quote.sub}
+        <LogoBtn
+          id="tweet-quote"
+          href={generateTwitterLink(quote.sub, quote.main)}
+          src={twitter}
+          alt="Twitter"
+        />
+        <LogoBtn
+          id="share-quote"
+          href={generateTumblrLink(quote.sub, quote.main)}
+          src={tumblr}
+          alt="Tumblr"
+        />
+      {:else}
+        <ControlBtn
+          id="previous-quote"
+          onclick={onPreviousQuote}
+          src={chevronLeft}
+          alt="Previous Quote"
+        />
+        <ControlBtn
+          id="next-quote"
+          onclick={onNextQuote}
+          src={chevronRight}
+          alt="Next Quote"
+        />
+      {/if}
+    </div>
+    <ControlBtn
+      id="randomize"
+      onclick={onRandomQuote}
+      src={dice}
+      alt="Random"
+    />
+  </div>
 </section>
 
 <style>
-	@keyframes spin {
-		0% {
-			transform: rotate(0deg);
-		}
-		100% {
-			transform: rotate(360deg);
-		}
-	}
+  #quote-box {
+    width: 500px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 30px;
+    padding: 30px;
+    border-radius: 3px;
+    background: white;
+  }
 
-	#quote-box {
-		width: 500px;
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
-		gap: 30px;
-		padding: 30px;
-		border-radius: 3px;
-		background: white;
-	}
+  blockquote {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 
-	blockquote {
-		display: flex;
-		flex-direction: column;
-		gap: 15px;
+    & * {
+      color: var(--current-color);
+      transition: color var(--transition-duration);
+    }
+  }
 
-		& * {
-			color: var(--current-color);
-			transition: color var(--transition-duration);
-		}
+  #text,
+  #main {
+    font-size: var(--font-size-l);
+    text-align: center;
+  }
 
-		&:has(.fetching) {
-			flex-direction: row;
-			justify-content: center;
-		}
-	}
+  #author {
+    font-size: var(--font-size-m);
+    font-weight: 300;
+    margin-left: auto;
+  }
 
-	.fetching,
-	#text,
-	#title,
-	.error {
-		font-size: var(--font-size-l);
-		text-align: center;
-	}
+  #sub {
+    font-size: var(--font-size-s);
+    text-align: justify;
+    max-height: 200px;
+    overflow-y: auto;
+  }
 
-	#author {
-		font-size: var(--font-size-m);
-		font-weight: 300;
-		margin-left: auto;
-	}
+  #btn-container {
+    display: flex;
+    justify-content: space-between;
 
-	#desc {
-		font-size: var(--font-size-s);
-		text-align: justify;
-		max-height: 200px;
-		overflow-y: auto;
-	}
+    & > div {
+      display: flex;
+      gap: 10px;
+    }
+  }
 
-	#btn-container {
-		display: flex;
-		justify-content: space-between;
-
-		& > div {
-			display: flex;
-			gap: 10px;
-		}
-
-		& > .control {
-			margin-left: auto;
-		}
-	}
-
-	.loading-icon {
-		width: var(--font-size-m);
-		aspect-ratio: 1/1;
-		animation: spin 1s linear infinite;
-
-		& > path {
-			fill: var(--current-color);
-		}
-	}
-
-	@media (max-width: 768px) {
-		#quote-box {
-			max-width: 500px;
-			width: 100%;
-		}
-	}
+  @media (max-width: 768px) {
+    #quote-box {
+      max-width: 500px;
+      width: 100%;
+    }
+  }
 </style>

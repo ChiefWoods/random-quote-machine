@@ -16,6 +16,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
   },
   "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],
   "references": [{ "path": "./tsconfig.node.json" }]

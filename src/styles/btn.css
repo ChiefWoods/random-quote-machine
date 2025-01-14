@@ -15,9 +15,4 @@
   &:hover {
     opacity: 0.8;
   }
-
-  & > img {
-    width: 20px;
-    aspect-ratio: 1/1;
-  }
 }

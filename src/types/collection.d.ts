@@ -1,16 +1,13 @@
-export interface Collection {
-  fullName: string,
-  colors: string[],
-  quotes: Quote[],
-}
+export type Quote = {
+  id: number;
+  collection_id: number;
+  main: string;
+  sub?: string;
+};
 
-export interface Quote {
-  _id: number,
-  title: string,
-  desc: string,
-}
-
-export interface CollectionName {
+export type Collection = {
+  id: number;
   name: string;
-  fullName: string;
-}
+  colors: string[];
+  quotes: Quote[];
+};
