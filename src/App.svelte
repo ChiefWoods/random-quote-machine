@@ -7,8 +7,7 @@
   import { getRandomIndex } from "./lib/utils";
 
   let index: number = $state(0);
-  let availableCollections: Promise<Pick<Collection, "id" | "name">[]> =
-    $state(getCollectionNames());
+  let availableCollections: Pick<Collection, "id" | "name">[] = $state([]);
   let currentCollection: Collection = $state() as Collection;
   let quote: Quote = $state() as Quote;
   let currentColor: string = "#fff";
@@ -70,8 +69,11 @@
     }
   });
 
-  availableCollections.then((col) => {
-    setQuote(col[0].id);
+  $effect(() => {
+    getCollectionNames().then((names) => {
+      availableCollections = names;
+      setQuote(names[0].id);
+    });
   });
 </script>
 
@@ -89,10 +91,18 @@
     </div>
   {/snippet}
 
+  {#snippet error()}
+    <div>
+      <p class="error">Unable to fetch quotes. Try again later.</p>
+    </div>
+  {/snippet}
+
   {#await availableCollections}
     {@render loading()}
   {:then collections}
-    {#if currentCollection}
+    {#if !currentCollection}
+      {@render error()}
+    {:else}
       <Select {collections} onchange={changeCollection} />
       <Card
         {quote}
@@ -101,13 +111,9 @@
         onPreviousQuote={setPreviousQuote}
         onNextQuote={setNextQuote}
       />
-    {:else}
-      {@render loading()}
     {/if}
   {:catch err}
-    <div>
-      <p class="error">Unable to fetch quotes. Try again later.</p>
-    </div>
+    {@render error()}
   {/await}
 </main>
 <Footer />

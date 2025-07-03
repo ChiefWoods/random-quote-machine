@@ -3,13 +3,27 @@ import type { Collection } from "../types/collection";
 export async function getCollectionNames(): Promise<
   Pick<Collection, "id" | "name">[]
   > {
-  return await fetch(`${import.meta.env.VITE_QUOTE_API_URL}/collections`).then(
-    (res) => res.json(),
-  );
+  const res = await fetch(`${import.meta.env.VITE_QUOTE_API_URL}/collections`);
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error);
+  }
+
+  return data;
 }
 
 export async function getCollection(id: number): Promise<Collection> {
-  return await fetch(
+  const res = await fetch(
     `${import.meta.env.VITE_QUOTE_API_URL}/collections/${id}`,
-  ).then((res) => res.json());
+  );
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error);
+  }
+
+  return data;
 }
