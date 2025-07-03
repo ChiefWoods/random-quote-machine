@@ -49,8 +49,8 @@ bun install
 
 3. Set .env values
 
-```
-VITE_QUOTE_API_URL=
+```bash
+cp .env.example .env
 ```
 
 4. Start development server
