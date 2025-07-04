@@ -6,8 +6,10 @@
   import Select from "./lib/Select.svelte";
   import { getRandomIndex } from "./lib/utils";
 
+  let loading: boolean = $state(true);
   let index: number = $state(0);
-  let availableCollections: Pick<Collection, "id" | "name">[] = $state([]);
+  let availableCollections: Promise<Pick<Collection, "id" | "name">[]> =
+    $state(getCollectionNames());
   let currentCollection: Collection = $state() as Collection;
   let quote: Quote = $state() as Quote;
   let currentColor: string = "#fff";
@@ -26,6 +28,7 @@
   }
 
   async function changeCollection(event: Event) {
+    loading = true;
     const target = event.target as HTMLSelectElement;
 
     const ids = (await availableCollections).map(({ id }) => id);
@@ -42,6 +45,7 @@
     currentCollection = col;
     index = getRandomIndex(col.quotes);
     quote = col.quotes[index];
+    loading = false;
   }
 
   function setRandomQuote() {
@@ -69,16 +73,13 @@
     }
   });
 
-  $effect(() => {
-    getCollectionNames().then((names) => {
-      availableCollections = names;
-      setQuote(names[0].id);
-    });
+  availableCollections.then((col) => {
+    setQuote(col[0].id);
   });
 </script>
 
 <main>
-  {#snippet loading()}
+  {#snippet loadingDiv()}
     <div>
       <p class="fetching">Fetching quote...</p>
       <svg
@@ -91,17 +92,19 @@
     </div>
   {/snippet}
 
-  {#snippet error()}
+  {#snippet errorDiv()}
     <div>
       <p class="error">Unable to fetch quotes. Try again later.</p>
     </div>
   {/snippet}
 
   {#await availableCollections}
-    {@render loading()}
+    {@render loadingDiv()}
   {:then collections}
-    {#if !currentCollection}
-      {@render error()}
+    {#if loading}
+      {@render loadingDiv()}
+    {:else if !currentCollection}
+      {@render errorDiv()}
     {:else}
       <Select {collections} onchange={changeCollection} />
       <Card
@@ -113,7 +116,7 @@
       />
     {/if}
   {:catch err}
-    {@render error()}
+    {@render errorDiv()}
   {/await}
 </main>
 <Footer />
