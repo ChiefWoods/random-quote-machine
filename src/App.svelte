@@ -106,7 +106,11 @@
     {:else if !currentCollection}
       {@render errorDiv()}
     {:else}
-      <Select {collections} onchange={changeCollection} />
+      <Select
+        {collections}
+        currentCollectionId={currentCollection.id}
+        onchange={changeCollection}
+      />
       <Card
         {quote}
         isVillains={currentCollection.name === "Villains"}

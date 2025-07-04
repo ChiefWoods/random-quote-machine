@@ -4,16 +4,18 @@
 
   let {
     collections,
+    currentCollectionId,
     onchange,
   }: {
     collections: Pick<Collection, "id" | "name">[];
+    currentCollectionId: number;
     onchange: ChangeEventHandler<HTMLSelectElement>;
   } = $props();
 </script>
 
 <select name="collection" {onchange}>
   {#each collections as { id, name }}
-    <option value={id}>{name}</option>
+    <option value={id} selected={currentCollectionId === id}>{name}</option>
   {/each}
 </select>
 
